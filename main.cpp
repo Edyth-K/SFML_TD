@@ -2,11 +2,7 @@
 #include "imgui-SFML.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
-
-bool hasMouseOver(sf::RectangleShape rect, sf::Vector2i mouse)
-{
-    return false;
-}
+#include "Enemy.h" // Include the Enemy class
 
 int main()
 {
@@ -15,20 +11,18 @@ int main()
     ImGui::SFML::Init(window);
     sf::Clock deltaClock;
 
-    std::vector<sf::RectangleShape> tile(16);
+    sf::Texture enemyTexture;
+    enemyTexture.loadFromFile("images/ghost.png");
 
-    
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-        {
-            sf::RectangleShape shape(sf::Vector2f(50, 50));
-            shape.setFillColor(sf::Color::Green);
-            shape.setPosition(i*100, j*100);
-            tile.push_back(shape);
-        }
+    // Create an instance of the Enemy class
+    sf::Vector2f startPosition(100.0f, 100.0f);
+    float speed = 0.5f; // Adjust the speed as needed
+    int health = 100;
 
+    Enemy enemy(startPosition, speed, health);
 
-    
+    // Associate the texture with the sprite directly in your code
+    enemy.setTexture(enemyTexture);
 
     while (window.isOpen())
     {
@@ -39,21 +33,6 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if (event.mouseButton.button == sf::Mouse::Left)
-            {
-                sf::Vector2i position = sf::Mouse::getPosition(window);
-                std::cout << "X: " << position.x << " Y: " << position.y << std::endl;
-                for (auto& rect : tile)
-                {
-                    if (rect.getTextureRect().contains(position))
-                    {
-                        rect.setFillColor(sf::Color::Red);
-                    }
-                    else {
-                        rect.setFillColor(sf::Color::Green);
-                    }
-                }
-            }
         }
         ImGui::SFML::Update(window, deltaClock.restart());
         
@@ -63,19 +42,17 @@ int main()
         ImGui::End();
 
         // GAME LOGIC
-        //  <insert here>
-        //sf::Vector2i position = sf::Mouse::getPosition(window);
-        //std::cout << "X: " << position.x << " Y: " << position.y << std::endl;
 
+        // Move the enemy towards a target position
+        sf::Vector2f targetPosition(400.0f, 300.0f);
+        enemy.move(targetPosition);
    
 
         // RENDERING
         window.clear();
 
-        for (const auto& rect : tile)
-        {
-            window.draw(rect);
-        }
+
+        enemy.render(window);
         ImGui::SFML::Render(window);
         window.display();
     }
